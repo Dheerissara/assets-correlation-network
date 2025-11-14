@@ -348,10 +348,10 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 250 * (1 - d.abs_corr) + 80)   // เพิ่มระยะเส้น
+        .distance(d => 250 * (1 - d.abs_corr) + 90)   // เพิ่มระยะเส้น
         .strength(d => d.abs_corr * 0.5)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-200))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-220))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 15)); // กันชนใหญ่ขึ้น
 
