@@ -190,7 +190,7 @@ corr => {
 function _corrLegend(d3)
 {
   const width = 260;
-  const height = 60;
+  const height = 100;
   const svg = d3.create("svg")
     .attr("width", width)
     .attr("height", height);
