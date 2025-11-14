@@ -465,7 +465,7 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
 
   svg.append("text")
     .attr("x", 20)
-    .attr("y", 24)
+    .attr("y", 20)
     .attr("font-size", 16)
     .attr("font-weight", "bold")
     .text(`Assets Correlation Network Analysis – ${period.key}`);
