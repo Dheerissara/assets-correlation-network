@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Untitled</title>
+<title>Assets Correlation Network</title>
 <link rel="stylesheet" type="text/css" href="./inspector.css">
+
 <body>
-<script type="module">
+  <!-- ให้ mainView มาแสดงตรง div นี้ -->
+  <div id="vis"></div>
 
-import define from "./index.js";
-import {Runtime, Library, Inspector} from "./runtime.js";
+  <script type="module">
+    import define from "./index.js";
+    import { Runtime, Inspector } from "./runtime.js";
 
-const runtime = new Runtime();
-const main = runtime.module(define, Inspector.into(document.body));
+    const runtime = new Runtime();
 
-</script>
+    // บอก Runtime ให้แสดงเฉพาะ cell ชื่อ "mainView"
+    runtime.module(define, name => {
+      if (name === "mainView") {
+        return Inspector.into("#vis")();   // ผูก mainView กับ <div id="vis">
+      }
+      return null; // cell อื่นไม่ต้องแสดง
+    });
+  </script>
+</body>
+</html>
