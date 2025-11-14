@@ -276,7 +276,7 @@ async function _nodeImages(FileAttachment)
 function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag,nodeImages)
 {
   const width = 1000;
-  const height = 650;
+  const height = 600;
 
   const period = periods[periodIndex];
   const {nodes, links} = dataByPeriod.get(period.id);
