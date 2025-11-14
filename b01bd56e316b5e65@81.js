@@ -181,7 +181,7 @@ Inputs.range([0, 1], {
 function _corrColor(){return(
 corr => {
   if (corr < 0) return "#d73027";          // Negative (แดง)
-  if (corr <= 0.40) return "#fc8d59";      // Weak (ส้ม)
+  if (corr <= 0.40) return "#F59D38";      // Weak (ส้ม)
   if (corr <= 0.60) return "#a6d96a";      // Moderate (เขียวอ่อน)
   return "#1a9850";                        // Strong (เขียวเข้ม)
 }
@@ -197,7 +197,7 @@ function _corrLegend(d3)
 
   const items = [
     {label: "Corr < 0 (Negative)", color: "#d73027"},
-    {label: "0.00 - 0.40 (Weak)", color: "#fc8d59"},
+    {label: "0.00 - 0.40 (Weak)", color: "#F59D38"},
     {label: "0.41 - 0.60 (Moderate)", color: "#a6d96a"},
     {label: "0.61 - 1.00 (Strong)", color: "#1a9850"}
   ];
