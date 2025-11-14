@@ -174,7 +174,7 @@ function _corrThreshold(Inputs){return(
 Inputs.range([0, 1], {
   step: 0.01,
   value: 0.0,
-  label: "Edge filter"
+  label: "Correlation filter"
 })
 )}
 
@@ -532,7 +532,7 @@ function _mainView(html,chart,$0,$1,corrLegend)
   // ใช้ของเดิมที่มีอยู่แล้ว
   graphDiv.append(chart);                 // กราฟ
   timelineDiv.append($0); // time slider
-  filterDiv.append($1); // edge filter
+  filterDiv.append($1); // Correlation filter
   legendDiv.append(corrLegend);           // legend สี
 
   return container;
