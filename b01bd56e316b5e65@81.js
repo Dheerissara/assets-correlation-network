@@ -348,7 +348,7 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 300 * (1 - d.abs_corr) + 80)   // เพิ่มระยะเส้น
+        .distance(d => 250 * (1 - d.abs_corr) + 80)   // เพิ่มระยะเส้น
         .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
     )
     .force("charge", d3.forceManyBody().strength(-250))  // ดัน node ออก
