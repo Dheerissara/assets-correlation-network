@@ -276,7 +276,7 @@ async function _nodeImages(FileAttachment)
 function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag,nodeImages)
 {
   const width = 1000;
-  const height = 580;
+  const height = 590;
 
   const period = periods[periodIndex];
   const {nodes, links} = dataByPeriod.get(period.id);
@@ -348,7 +348,7 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 250 * (1 - d.abs_corr) + 100)   // เพิ่มระยะเส้น
+        .distance(d => 250 * (1 - d.abs_corr) + 80)   // เพิ่มระยะเส้น
         .strength(d => d.abs_corr * 0.5)              // ลดแรงดึงลง
     )
     .force("charge", d3.forceManyBody().strength(-250))  // ดัน node ออก
