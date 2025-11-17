@@ -243,7 +243,7 @@ function _corrRange(html)
     <div style="
       display:flex;
       justify-content:center;
-      gap:100px;
+      gap:80px;
       margin-top:2px;
     ">
       <span>-1</span>
