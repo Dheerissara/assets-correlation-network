@@ -646,19 +646,54 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
 
   // ------- อัปเดตตำแหน่งตอน simulation วิ่ง --------
   simulation.on("tick", () => {
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
+  // อัปเดตตำแหน่งเส้น
+  link
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
 
-    nodeG
-      .attr("transform", d => `translate(${d.x},${d.y})`);
+  const padding = 30; // ระยะห่างจากขอบ
 
-    label
-      .attr("x", d => d.x)
-      .attr("y", d => d.y - 2);
-  });
+  nodeG
+    .attr("transform", d => {
+      // เผื่อกรณีค่าหาย ให้เป็น 0 ก่อน
+      d.x ??= 0;
+      d.y ??= 0;
+      d.vx ??= 0;
+      d.vy ??= 0;
+
+      // ถ้าเลยซ้าย → เด้งกลับขวา
+      if (d.x < padding) {
+        d.x = padding;
+        d.vx = Math.abs(d.vx);     // กลับทิศให้กระเด้งเข้าด้านใน
+      }
+      // ถ้าเลยขวา → เด้งกลับซ้าย
+      else if (d.x > width - padding) {
+        d.x = width - padding;
+        d.vx = -Math.abs(d.vx);
+      }
+
+      // ถ้าเลยบน → เด้งลงล่าง
+      if (d.y < padding) {
+        d.y = padding;
+        d.vy = Math.abs(d.vy);
+      }
+      // ถ้าเลยล่าง → เด้งขึ้นบน
+      else if (d.y > height - padding) {
+        d.y = height - padding;
+        d.vy = -Math.abs(d.vy);
+      }
+
+      return `translate(${d.x},${d.y})`;
+    });
+
+  // label ตาม node
+  label
+    .attr("x", d => d.x)
+    .attr("y", d => d.y - 2);
+});
+
 
    return svg.node();
 }
