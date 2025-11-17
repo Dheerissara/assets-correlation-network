@@ -752,14 +752,17 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
 
       <!-- legend: มุมขวาล่าง -->
       <div id="legend"
-           style="
-             position: absolute;
-             bottom: 100px;
-             right: 0px;
-             background: white;
-             padding: 5px 10px;
-             border-radius: 5px;
-           ">
+         style="
+           position: absolute;
+           bottom: 120px;
+           right: 0px;
+           background: white;
+           padding: 6px 10px;
+           border-radius: 6px;
+           display: inline-block;     /* ←ให้กล่องหดตามเนื้อหา */
+           max-width: 180px;          /* ← กันล้น */
+           box-shadow: 0 0 4px rgba(0,0,0,0.1); /* optional ให้ดูเนียน */
+         ">
       </div>
     </div>
   `;
