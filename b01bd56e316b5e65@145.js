@@ -550,12 +550,12 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 330 * (1 - d.abs_corr) + 100)   // เพิ่มระยะเส้น
-        .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
+        .distance(d => 350 * (1 - d.abs_corr) + 120)   // เพิ่มระยะเส้น
+        .strength(d => d.abs_corr * 0.5)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-200))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-220))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 10)); // กันชนใหญ่ขึ้น
+    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 12)); // กันชนใหญ่ขึ้น
 
 
   // draw links (ของเดิม ไม่ต้องแก้)
@@ -683,9 +683,9 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
       <div id="title"
            style="
              position:absolute;
-             top:40px;
+             top:60px;
              left:0px;
-             font-size:16px;
+             font-size:18px;
              font-weight:bold;
            ">
         Assets Correlation Network Analysis – ${period.key}
@@ -695,7 +695,7 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
       <div id="filter"
            style="
              position:absolute;
-             top:20px;
+             top:40px;
              right:0px;
            ">
       </div>
