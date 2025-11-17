@@ -1,5 +1,3 @@
-import define1 from "./a2e58f97fd5e8d7c@756.js";
-
 function _d3(require){return(
 require("d3@7")
 )}
@@ -86,16 +84,30 @@ async function _dataByPeriod(FileAttachment)
 
   // แปลงค่า numeric
   for (const p of allData) {
+
+    // node metrics
     for (const n of p.nodes) {
-      n.degree = +n.degree;
-      n.strength = +n.strength;
+      n.degree      = +n.degree;
+      n.strength    = +n.strength;
       n.betweenness = +n.betweenness;
     }
+
+    // edge metrics
     for (const e of p.links) {
-      e.corr = +e.corr;
+      // ให้ abs_corr, weight เป็นตัวเลขก่อน
       e.abs_corr = +e.abs_corr;
-      e.weight = +e.weight;
+      e.weight   = +e.weight;
+
+      // ถ้ามีคอลัมน์ corr อยู่แล้ว → ใช้เลย
+      if (e.corr !== undefined && e.corr !== "") {
+        e.corr = +e.corr;
+      } else {
+        // ถ้าไม่มี corr → สร้างจาก sign * abs_corr
+        const s = (e.sign === "-" ? -1 : 1);
+        e.corr = s * e.abs_corr;
+      }
     }
+
     map.set(p.id, {nodes: p.nodes, links: p.links});
   }
 
@@ -170,12 +182,191 @@ function _periodIndex(html,periods,d3)
 }
 
 
-function _corrThreshold(Inputs){return(
-Inputs.range([0, 1], {
-  step: 0.01,
-  value: 0.0,
-  label: "Correlation filter"
-})
+function _corrRange(html)
+{
+  const form = html`<div style="font:12px sans-serif; width:340px;">
+    <style>
+      .corr-range-wrapper {
+        position: relative;
+        flex: 1;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      /* เส้นจำนวนพื้นฐาน */
+      .corr-range-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 4px;
+        background: #ddd;
+        border-radius: 2px;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+
+      /* ช่วงที่เลือก (min → max) */
+      .corr-range-fill {
+        position: absolute;
+        top: 50%;
+        height: 4px;
+        background: #888;
+        border-radius: 2px;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
+    </style>
+
+    <div style="margin-bottom:4px; font-weight:bold;">
+      Correlation filter
+    </div>
+
+    <div style="display:flex; align-items:center; gap:6px;">
+      <!-- กล่อง min -->
+      <input name="minBox" type="text"
+             placeholder="-0.8"
+             style="width:60px; font:inherit; padding:2px 4px;">
+
+      <!-- เส้นจำนวน + ช่วงที่เลือก -->
+      <div class="corr-range-wrapper">
+        <div class="corr-range-bar"></div>
+        <div class="corr-range-fill"></div>
+      </div>
+
+      <!-- กล่อง max -->
+      <input name="maxBox" type="text"
+             placeholder="0.5"
+             style="width:60px; font:inherit; padding:2px 4px;">
+    </div>
+
+    <div style="
+      display:flex;
+      justify-content:center;
+      gap:70px;
+      margin-top:2px;
+    ">
+      <span>-1</span>
+      <span>0</span>
+      <span>1</span>
+    </div>
+  </div>`;
+
+  const minBox   = form.querySelector("input[name=minBox]");
+  const maxBox   = form.querySelector("input[name=maxBox]");
+  const wrapper  = form.querySelector(".corr-range-wrapper");
+  const fill     = form.querySelector(".corr-range-fill");
+
+  // ค่าเริ่มต้น
+  let min = -0.8;
+  let max =  0.5;
+
+  function clamp(v) {
+    return Math.max(-1, Math.min(1, v));
+  }
+  function quantize(v) {
+    return Math.round(v * 100) / 100;  // step 0.01
+  }
+  function parseNumber(str, fallback) {
+    const v = parseFloat(String(str).replace(",", "."));
+    return Number.isNaN(v) ? fallback : v;
+  }
+
+  function updateFill() {
+    const left  = ((min + 1) / 2) * 100;   // [-1,1] -> [0,100]
+    const right = ((max + 1) / 2) * 100;
+    fill.style.left  = `${left}%`;
+    fill.style.width = `${right - left}%`;
+  }
+
+  function syncUI(from = null) {
+    if (min > max) [min, max] = [max, min];
+
+    min = clamp(min);
+    max = clamp(max);
+
+    if (from !== "minBox") minBox.value = min.toFixed(2);
+    if (from !== "maxBox") maxBox.value = max.toFixed(2);
+
+    updateFill();
+
+    form.value = [min, max];
+    form.dispatchEvent(new CustomEvent("input"));
+  }
+
+  // กล่องตัวเลข
+  minBox.addEventListener("change", () => {
+    min = quantize(parseNumber(minBox.value, min));
+    syncUI("minBox");
+  });
+
+  maxBox.addEventListener("change", () => {
+    max = quantize(parseNumber(maxBox.value, max));
+    syncUI("maxBox");
+  });
+
+  // คลิก/hold + ลากบนแท่ง
+  let activeHandle = null;
+
+  wrapper.addEventListener("pointerdown", (event) => {
+    const rect = wrapper.getBoundingClientRect();
+    const t = (event.clientX - rect.left) / rect.width; // 0..1
+    let value = clamp(-1 + t * 2);
+    value = quantize(value);
+
+    // เลือกปลายที่ใกล้ที่สุด (min หรือ max)
+    const distMin = Math.abs(value - min);
+    const distMax = Math.abs(value - max);
+    if (distMin <= distMax) {
+      activeHandle = "min";
+      min = value;
+    } else {
+      activeHandle = "max";
+      max = value;
+    }
+    syncUI();
+
+    wrapper.setPointerCapture(event.pointerId);
+  });
+
+  wrapper.addEventListener("pointermove", (event) => {
+    if (!activeHandle) return;
+    const rect = wrapper.getBoundingClientRect();
+    const t = (event.clientX - rect.left) / rect.width;
+    let value = clamp(-1 + t * 2);
+    value = quantize(value);
+
+    if (activeHandle === "min") {
+      min = Math.min(value, max);
+    } else {
+      max = Math.max(value, min);
+    }
+    syncUI();
+  });
+
+  wrapper.addEventListener("pointerup", (event) => {
+    activeHandle = null;
+    try { wrapper.releasePointerCapture(event.pointerId); } catch (e) {}
+  });
+  wrapper.addEventListener("pointercancel", () => {
+    activeHandle = null;
+  });
+
+  // sync ครั้งแรก
+  syncUI();
+
+  return form;
+}
+
+
+function _corrRangeMode(Inputs){return(
+Inputs.radio(
+  ["In range", "Outside range (tails)"],
+  {
+    label: "",
+    value: "In range"             // ค่าเริ่มต้น
+  }
+)
 )}
 
 function _corrColor(){return(
@@ -259,7 +450,7 @@ function drag(simulation) {
 async function _nodeImages(FileAttachment)
 {
   // อ่านไฟล์ mapping รูปภาพ
-  const rows = await FileAttachment("node_pic.csv").csv();
+  const rows = await FileAttachment("node_pic@2.csv").csv();
 
   const map = new Map();
   for (const r of rows) {
@@ -273,17 +464,28 @@ async function _nodeImages(FileAttachment)
 }
 
 
-function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag,nodeImages)
+function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corrColor,drag,nodeImages)
 {
   const width = 1000;
-  const height = 580;
+  const height = 830;
 
   const period = periods[periodIndex];
   const {nodes, links} = dataByPeriod.get(period.id);
 
-  // filter edges ตาม corrThreshold (ใช้ abs_corr)
-  const minAbsCorr = corrThreshold;
-  const filteredLinks = links.filter(d => d.abs_corr >= minAbsCorr);
+// filter edges ตาม corrRange / corrRangeMode
+  const [r0, r1] = corrRange;
+  const minCorr = Math.min(r0, r1);
+  const maxCorr = Math.max(r0, r1);
+
+  let filteredLinks;
+  if (corrRangeMode === "In range") {
+    // แสดงเฉพาะ edge ที่ corr อยู่ในช่วงที่เลือก
+    filteredLinks = links.filter(d => d.corr >= minCorr && d.corr <= maxCorr);
+  } else {
+    // Outside range (tails): แสดงเฉพาะ edge ที่ corr อยู่นอกช่วง
+    // เช่น เลือก [-0.4, 0.4] → เหลือ corr <= -0.4 หรือ >= 0.4
+    filteredLinks = links.filter(d => d.corr <= minCorr || d.corr >= maxCorr);
+  }
 
   // เก็บเฉพาะ node ที่มี edge หลัง filter
   const usedIds = new Set();
@@ -348,10 +550,10 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 220 * (1 - d.abs_corr) + 80)   // เพิ่มระยะเส้น
+        .distance(d => 350 * (1 - d.abs_corr) + 100)   // เพิ่มระยะเส้น
         .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-200))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-250))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 15)); // กันชนใหญ่ขึ้น
 
@@ -463,19 +665,14 @@ function _chart(periods,periodIndex,dataByPeriod,corrThreshold,d3,corrColor,drag
       .attr("y", d => d.y - 2);
   });
 
-  svg.append("text")
-    .attr("x", 20)
-    .attr("y", 15)
-    .attr("font-size", 16)
-    .attr("font-weight", "bold")
-    .text(`Assets Correlation Network Analysis – ${period.key}`);
-
-  return svg.node();
+   return svg.node();
 }
 
 
-function _mainView(html,chart,$0,$1,corrLegend)
+function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
 {
+  const period = periods[periodIndex];   // เอา period.key มาใช้ในหัวข้อ
+
   const container = html`
     <div style="
       position: relative;
@@ -483,11 +680,33 @@ function _mainView(html,chart,$0,$1,corrLegend)
       max-width: 1100px;
       margin: auto;
       font: 12px sans-serif;
-      padding: 20px 20px 80px 20px;
+      padding: 60px 20px 80px 20px;
       box-sizing: border-box;
     ">
-      <!-- พื้นที่กราฟหลัก -->
-      <div id="graph" style="width:100%;"></div>
+
+      <!-- title: มุมซ้ายบน -->
+      <div id="title"
+           style="
+             position:absolute;
+             top:40px;
+             left:0px;
+             font-size:16px;
+             font-weight:bold;
+           ">
+        Assets Correlation Network Analysis – ${period.key}
+      </div>
+
+      <!-- filter: มุมขวาบน (ระดับเดียวกับ title) -->
+      <div id="filter"
+           style="
+             position:absolute;
+             top:20px;
+             right:0px;
+           ">
+      </div>
+
+      <!-- พื้นที่กราฟหลัก (ขยับลงไม่ให้ชนหัว) -->
+      <div id="graph" style="width:100%; margin-top:40px;"></div>
 
       <!-- time slider: กลางล่างสุด -->
       <div id="timeline"
@@ -501,21 +720,12 @@ function _mainView(html,chart,$0,$1,corrLegend)
            ">
       </div>
 
-      <!-- filter: มุมขวาบน -->
-      <div id="filter"
-           style="
-             position: absolute;
-             top: 10px;
-             right: 20px;
-           ">
-      </div>
-
       <!-- legend: มุมขวาล่าง -->
       <div id="legend"
            style="
              position: absolute;
              bottom: 120px;
-             right: -20px;
+             right: 0px;
              background: white;
              padding: 5px 10px;
              border-radius: 5px;
@@ -529,12 +739,20 @@ function _mainView(html,chart,$0,$1,corrLegend)
   const filterDiv   = container.querySelector("#filter");
   const legendDiv   = container.querySelector("#legend");
 
-  // ใช้ของเดิมที่มีอยู่แล้ว
+  // ใช้ของเดิม
   graphDiv.append(chart);                 // กราฟ
   timelineDiv.append($0); // time slider
-  filterDiv.append($1); // Correlation filter
-  legendDiv.append(corrLegend);           // legend สี
+  
+  filterDiv.append($1);     // slider corr
+  
+  const modeBox = html`<div style="margin-left: 70px;">`;
+  modeBox.append($2);
+  filterDiv.append(modeBox);
+  
+  legendDiv.append(corrLegend);           // legend
 
+
+  
   return container;
 }
 
@@ -555,23 +773,23 @@ export default function define(runtime, observer) {
     ["edges_Crisis_2020.csv", {url: new URL("./files/0800ba37528800b827438ef3ca8912ef50ec192e95962ab5fdc1de35dda10672f0f14d7a100adc3abfb11eee6d538379e9e6e66fba1181cda77f9f2d0ac9f475.csv", import.meta.url), mimeType: "text/csv", toString}],
     ["edges_Post_Crisis_2021.csv", {url: new URL("./files/51705b2e7ca7a139938e2e35a7a1efdabd1c0e2453a3f0f8fbcbef8d79a516ddabede96484f678dd5f9cfc22dfdbbbb86424626c701467adb2294442704d0528.csv", import.meta.url), mimeType: "text/csv", toString}],
     ["edges_Post_Crisis_2024.csv", {url: new URL("./files/20f3afcf4b7649aae911a6122c856dd3fcbb75792cb07bbb6b8532f4f761d3868ff12613aa8e3c96048a8dd48090d4ce646879bddaf7983aaa82e57afb227950.csv", import.meta.url), mimeType: "text/csv", toString}],
-    ["node_pic.csv", {url: new URL("./files/441d9327bb319792f32c8a05f32e2d8d28a133dd41a1cbe9c2f3939942c64100364fe0c4a607e6d0ed1719185e1f1dbd78598adc0f8b31adb268a2c40a6a8ad4.csv", import.meta.url), mimeType: "text/csv", toString}]
+    ["node_pic@2.csv", {url: new URL("./files/85cb431d76bf3997eb715e14ccef7cb5fa04b619d6b6a51e2277b1432e31ba8f107ada9c8d0a8bc01748a4bdd1227bbcf7cf81a62141fd29bcc290ce0e7d877f.csv", import.meta.url), mimeType: "text/csv", toString}]
   ]);
   main.builtin("FileAttachment", runtime.fileAttachments(name => fileAttachments.get(name)));
-  const child1 = runtime.module(define1);
-  main.import("Inputs", child1);
   main.variable(observer("d3")).define("d3", ["require"], _d3);
   main.variable(observer("periods")).define("periods", _periods);
   main.variable(observer("dataByPeriod")).define("dataByPeriod", ["FileAttachment"], _dataByPeriod);
   main.variable(observer("viewof periodIndex")).define("viewof periodIndex", ["html","periods","d3"], _periodIndex);
   main.variable(observer("periodIndex")).define("periodIndex", ["Generators", "viewof periodIndex"], (G, _) => G.input(_));
-  main.variable(observer("viewof corrThreshold")).define("viewof corrThreshold", ["Inputs"], _corrThreshold);
-  main.variable(observer("corrThreshold")).define("corrThreshold", ["Generators", "viewof corrThreshold"], (G, _) => G.input(_));
+  main.variable(observer("viewof corrRange")).define("viewof corrRange", ["html"], _corrRange);
+  main.variable(observer("corrRange")).define("corrRange", ["Generators", "viewof corrRange"], (G, _) => G.input(_));
+  main.variable(observer("viewof corrRangeMode")).define("viewof corrRangeMode", ["Inputs"], _corrRangeMode);
+  main.variable(observer("corrRangeMode")).define("corrRangeMode", ["Generators", "viewof corrRangeMode"], (G, _) => G.input(_));
   main.variable(observer("corrColor")).define("corrColor", _corrColor);
   main.variable(observer("corrLegend")).define("corrLegend", ["d3"], _corrLegend);
   main.variable(observer("drag")).define("drag", ["d3"], _drag);
   main.variable(observer("nodeImages")).define("nodeImages", ["FileAttachment"], _nodeImages);
-  main.variable(observer("chart")).define("chart", ["periods","periodIndex","dataByPeriod","corrThreshold","d3","corrColor","drag","nodeImages"], _chart);
-  main.variable(observer("mainView")).define("mainView", ["html","chart","viewof periodIndex","viewof corrThreshold","corrLegend"], _mainView);
+  main.variable(observer("chart")).define("chart", ["periods","periodIndex","dataByPeriod","corrRange","corrRangeMode","d3","corrColor","drag","nodeImages"], _chart);
+  main.variable(observer("mainView")).define("mainView", ["periods","periodIndex","html","chart","viewof periodIndex","viewof corrRange","viewof corrRangeMode","corrLegend"], _mainView);
   return main;
 }
