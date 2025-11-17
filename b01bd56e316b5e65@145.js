@@ -258,8 +258,8 @@ function _corrRange(html)
   const fill     = form.querySelector(".corr-range-fill");
 
   // ค่าเริ่มต้น
-  let min = -0.8;
-  let max =  0.5;
+  let min = -1.0;
+  let max =  1.0;
 
   function clamp(v) {
     return Math.max(-1, Math.min(1, v));
@@ -550,12 +550,12 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 280 * (1 - d.abs_corr) + 90)   // เพิ่มระยะเส้น
-        .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
+        .distance(d => 250 * (1 - d.abs_corr) + 70)   // เพิ่มระยะเส้น
+        .strength(d => d.abs_corr * 0.7)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-160))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-130))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 10)); // กันชนใหญ่ขึ้น
+    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 19)); // กันชนใหญ่ขึ้น
 
 
   // draw links (ของเดิม ไม่ต้องแก้)
