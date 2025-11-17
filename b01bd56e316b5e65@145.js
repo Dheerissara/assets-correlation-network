@@ -243,7 +243,7 @@ function _corrRange(html)
     <div style="
       display:flex;
       justify-content:center;
-      gap:80px;
+      gap:100px;
       margin-top:2px;
     ">
       <span>-1</span>
@@ -719,7 +719,7 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
       <div id="legend"
            style="
              position: absolute;
-             bottom: 80px;
+             bottom: 40px;
              right: 0px;
              background: white;
              padding: 5px 10px;
