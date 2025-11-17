@@ -550,12 +550,12 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 350 * (1 - d.abs_corr) + 100)   // เพิ่มระยะเส้น
-        .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
+        .distance(d => 220 * (1 - d.abs_corr) + 60)   // เพิ่มระยะเส้น
+        .strength(d => d.abs_corr * 0.8)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-250))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-130))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 15)); // กันชนใหญ่ขึ้น
+    .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 8)); // กันชนใหญ่ขึ้น
 
 
   // draw links (ของเดิม ไม่ต้องแก้)
