@@ -653,12 +653,7 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
       .attr("y2", d => d.target.y);
 
     nodeG
-      .attr("transform", d => {
-        // กันไม่ให้หลุดขอบ
-        d.x = Math.max(40, Math.min(width - 40, d.x));
-        d.y = Math.max(40, Math.min(height - 40, d.y));
-        return `translate(${d.x},${d.y})`;
-      });
+      .attr("transform", d => `translate(${d.x},${d.y})`);
 
     label
       .attr("x", d => d.x)
