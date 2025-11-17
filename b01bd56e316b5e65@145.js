@@ -754,7 +754,7 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
       <div id="legend"
          style="
            position: absolute;
-           bottom: 120px;
+           bottom: 30px;
            right: 0px;
            background: white;
            padding: 6px 10px;
