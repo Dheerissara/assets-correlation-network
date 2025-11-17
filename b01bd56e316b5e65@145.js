@@ -225,7 +225,7 @@ function _corrRange(html)
     <div style="display:flex; align-items:center; gap:6px;">
       <!-- กล่อง min -->
       <input name="minBox" type="text"
-             placeholder="-0.8"
+             placeholder="-1.0"
              style="width:60px; font:inherit; padding:2px 4px;">
 
       <!-- เส้นจำนวน + ช่วงที่เลือก -->
@@ -236,7 +236,7 @@ function _corrRange(html)
 
       <!-- กล่อง max -->
       <input name="maxBox" type="text"
-             placeholder="0.5"
+             placeholder="1.0"
              style="width:60px; font:inherit; padding:2px 4px;">
     </div>
 
@@ -550,10 +550,10 @@ function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corr
    .force("link",
       d3.forceLink(linksWithRef)
        .id(d => d.id)
-        .distance(d => 300 * (1 - d.abs_corr) + 90)   // เพิ่มระยะเส้น
+        .distance(d => 280 * (1 - d.abs_corr) + 90)   // เพิ่มระยะเส้น
         .strength(d => d.abs_corr * 0.6)              // ลดแรงดึงลง
     )
-    .force("charge", d3.forceManyBody().strength(-180))  // ดัน node ออก
+    .force("charge", d3.forceManyBody().strength(-160))  // ดัน node ออก
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("collision", d3.forceCollide().radius(d => nodeSize(d.strength) + 10)); // กันชนใหญ่ขึ้น
 
