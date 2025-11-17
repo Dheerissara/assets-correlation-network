@@ -466,8 +466,8 @@ async function _nodeImages(FileAttachment)
 
 function _chart(periods,periodIndex,dataByPeriod,corrRange,corrRangeMode,d3,corrColor,drag,nodeImages)
 {
-  const width = 670;
-  const height = 560;
+  const width = 1000;
+  const height = 600;
 
   const period = periods[periodIndex];
   const {nodes, links} = dataByPeriod.get(period.id);
@@ -719,7 +719,7 @@ function _mainView(periods,periodIndex,html,chart,$0,$1,$2,corrLegend)
       <div id="legend"
            style="
              position: absolute;
-             bottom: 40px;
+             bottom: 30px;
              right: 0px;
              background: white;
              padding: 5px 10px;
