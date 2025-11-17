@@ -1,0 +1,14 @@
+{
+  "name": "b01bd56e316b5e65",
+  "main": "b01bd56e316b5e65@145.js",
+  "version": "145.0.0",
+  "homepage": "https://observablehq.com/d/b01bd56e316b5e65",
+  "author": {
+    "name": "CU",
+    "url": "https://observablehq.com/@cu2"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
