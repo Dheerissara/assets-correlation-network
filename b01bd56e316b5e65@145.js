@@ -1,5 +1,3 @@
-import define1 from "./a2e58f97fd5e8d7c@756.js";   // ← เพิ่มบรรทัดนี้
-
 function _d3(require){return(
 require("d3@7")
 )}
@@ -66,13 +64,13 @@ async function _dataByPeriod(FileAttachment)
   const edges2021 = await FileAttachment("edges_Post_Crisis_2021.csv").csv({typed: true});
 
   const nodes2022 = await FileAttachment("nodes_Post_Crisis_2022.csv").csv({typed: true});
-  const edges2022 = await FileAttachment("nodes_Post_Crisis_2022.csv").csv({typed: true});
+  const edges2022 = await FileAttachment("edges_Post_Crisis_2022.csv").csv({typed: true});
 
   const nodes2023 = await FileAttachment("nodes_Post_Crisis_2023.csv").csv({typed: true});
-  const edges2023 = await FileAttachment("nodes_Post_Crisis_2023.csv").csv({typed: true});
+  const edges2023 = await FileAttachment("edges_Post_Crisis_2023.csv").csv({typed: true});
 
   const nodes2024 = await FileAttachment("nodes_Post_Crisis_2024.csv").csv({typed: true});
-  const edges2024 = await FileAttachment("nodes_Post_Crisis_2024.csv").csv({typed: true});
+  const edges2024 = await FileAttachment("edges_Post_Crisis_2024.csv").csv({typed: true});
 
   // สร้างรายการ mapping ตาม periods
   const allData = [
@@ -811,11 +809,6 @@ export default function define(runtime, observer) {
     ["node_pic@2.csv", {url: new URL("./files/85cb431d76bf3997eb715e14ccef7cb5fa04b619d6b6a51e2277b1432e31ba8f107ada9c8d0a8bc01748a4bdd1227bbcf7cf81a62141fd29bcc290ce0e7d877f.csv", import.meta.url), mimeType: "text/csv", toString}]
   ]);
   main.builtin("FileAttachment", runtime.fileAttachments(name => fileAttachments.get(name)));
-
-  // เพิ่มแค่สองบรรทัดนี้เพื่อเอา Inputs เข้ามา
-  const child1 = runtime.module(define1);
-  main.import("Inputs", child1);
-
   main.variable(observer("d3")).define("d3", ["require"], _d3);
   main.variable(observer("periods")).define("periods", _periods);
   main.variable(observer("dataByPeriod")).define("dataByPeriod", ["FileAttachment"], _dataByPeriod);
